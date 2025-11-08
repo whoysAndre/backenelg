@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { VariantProduct } from './entities/variants-product.entity';
 import { CategoriesModule } from 'src/categories/categories.module';
+import { FilesModule } from 'src/files/files.module';
 
 
 @Module({
@@ -12,8 +13,9 @@ import { CategoriesModule } from 'src/categories/categories.module';
   providers: [ProductsService],
   imports: [
     TypeOrmModule.forFeature([Product, VariantProduct]),
-    CategoriesModule
+    CategoriesModule,
+    FilesModule
   ],
-  exports:[TypeOrmModule, ProductsService]
+  exports: [TypeOrmModule, ProductsService]
 })
 export class ProductsModule { }

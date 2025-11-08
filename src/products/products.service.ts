@@ -6,6 +6,7 @@ import { CategoriesService } from 'src/categories/categories.service';
 import { DataSource, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { VariantProduct } from './entities/variants-product.entity';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class ProductsService {
@@ -17,18 +18,28 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(VariantProduct)
     private readonly variantProductRepository: Repository<VariantProduct>,
-
+    private readonly fileService: FilesService,
     private readonly dataSource: DataSource
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, image?: Express.Multer.File) {
     try {
       const { variants = [], categoryId, ...restProduct } = createProductDto;
+
       const category = await this.categoryRepository.findOne(categoryId);
+      let imageUrl: string | undefined;
+      let publicUrl: string | undefined;
+      if (image) {
+        const uploadResult = await this.fileService.uploadImageToCloudinary(image);
+        imageUrl = uploadResult.url;
+        publicUrl = uploadResult.public_id;
+      }
 
       const product = this.productRepository.create({
         ...restProduct,
         category,
+        imageUrl,
+        publicUrl,
         variantProduct: variants.map((variant) => this.variantProductRepository.create({
           sizes: variant.sizes,
           color: variant.color,
