@@ -57,9 +57,3 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 #Docker
 /postgres
-
-# Archivos temporales de PostgreSQL
-postgres/pg_stat_tmp/
-postgres/pg_wal/
-postgres/pg_stat/
-postgres/postmaster.pid
