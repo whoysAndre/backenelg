@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -11,28 +12,26 @@ export class CategoriesService {
   @InjectRepository(Category)
   private readonly categoryRepository: Repository<Category>;
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto, user: User) {
     try {
-
-      const category = this.categoryRepository.create(createCategoryDto);
+      const category = this.categoryRepository.create({
+        ...createCategoryDto,
+        user
+      });
       await this.categoryRepository.save(category);
       return category;
 
     } catch (error) {
-
+      throw new InternalServerErrorException(error);
     }
-
-    return 'This action adds a new category';
   }
 
   async findAll() {
-
     const categories = await this.categoryRepository.find({
       relations: {
         products: true
       }
     })
-
     return categories;
   }
 
@@ -47,11 +46,12 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto, user: User) {
 
     const category = await this.categoryRepository.preload({
       id,
-      ...updateCategoryDto
+      ...updateCategoryDto,
+      user
     })
     if (!category) throw new NotFoundException(`Category with id - ${id} not found`);
     try {
@@ -63,15 +63,11 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-
     const category = await this.findOne(id);
-
     await this.categoryRepository.remove(category);
-
     return {
       status: true,
       message: "Category deleted"
     }
-
   }
 }

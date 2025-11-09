@@ -1,5 +1,6 @@
+import { User } from "src/auth/entities/user.entity";
 import { Product } from "src/products/entities/product.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Category {
@@ -12,6 +13,13 @@ export class Category {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+
+  @ManyToOne(
+    () => User,
+    (u) => u.categories,
+    { eager: true }
+  )
+  user: User;
 
   //RELATION
   @OneToMany(

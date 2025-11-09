@@ -6,18 +6,21 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EncrypterService } from 'src/common/services/encrypter.service';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
 export class AuthService {
 
   constructor(
-    
+
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    @Inject()
-    private readonly encrypterService: EncrypterService
+    private readonly encrypterService: EncrypterService,
+
+    private readonly jwtService: JwtService,
 
   ) { }
 
@@ -29,11 +32,14 @@ export class AuthService {
         ...rest,
         password: passwordHashed
       });
+
       await this.userRepository.save(user);
 
+      const token = this.getJwtToken({ email: user.email });
 
       return {
-        ...rest
+        ...rest,
+        token
       }
 
     } catch (error) {
@@ -42,27 +48,20 @@ export class AuthService {
   }
 
   async login(loginUserDto: LoginUserDto) {
-    try {
+    const user = await this.userRepository.findOne({
+      where: {
+        email: loginUserDto.email
+      },
+      select: { email: true, password: true }
+    });
 
-      const user = await this.userRepository.findOne({
-        where: {
-          email: loginUserDto.email
-        },
-        select: { email: true, password: true }
-      });
+    if (!user) throw new UnauthorizedException("Credentials are not valid (email)");
 
-      if (!user) throw new UnauthorizedException("Credentials are not valid");
+    const passwordValid = await this.encrypterService.comparePassword(loginUserDto.password, user.password);
 
-      const passwordValid = await this.encrypterService.comparePassword(loginUserDto.password, user.password);
+    if (!passwordValid) throw new UnauthorizedException("Credentials are not valid (password)");
 
-      if (!passwordValid) new UnauthorizedException("Credentials are not valid");
-
-      return user;
-
-
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    return { token: this.getJwtToken({ email: user.email }), ...user };
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
@@ -71,5 +70,20 @@ export class AuthService {
 
   remove(id: string) {
     return `This action removes a #${id} auth`;
+  }
+
+
+  async checkAuthStatus(user: User) {
+    const token = this.getJwtToken({ email: user.email });
+    return {
+      ...user,
+      token
+    }
+  }
+
+  //JWT
+  private getJwtToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }

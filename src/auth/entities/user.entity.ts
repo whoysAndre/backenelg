@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Category } from "src/categories/entities/category.entity";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 export class User {
@@ -29,6 +30,22 @@ export class User {
   })
   roles: string[];
 
+  @BeforeInsert()
+  checkFieldBeforeInsert() {
+    this.email = this.email.toLocaleLowerCase().trim()
+  }
+
+  @BeforeUpdate()
+  checkFieldBeforeUpdate() {
+    this.checkFieldBeforeInsert()
+  }
+
   //Relations USer - Category
+  @OneToMany(
+    () => Category,
+    (c) => c.user
+  )
+  categories: Category[]
+
 
 }

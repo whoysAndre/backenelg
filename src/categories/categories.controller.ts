@@ -2,34 +2,42 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Auth, GetUser } from 'src/auth/decorators';
+import { Roles } from 'src/auth/interfaces';
+import { User } from 'src/auth/entities/user.entity';
 
 @Controller('categories')
 export class CategoriesController {
 
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(private readonly categoriesService: CategoriesService) { }
 
   @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  @Auth(Roles.ADMIN)
+  create(@Body() createCategoryDto: CreateCategoryDto, @GetUser() user: User) {
+    return this.categoriesService.create(createCategoryDto, user);
   }
 
   @Get()
+  @Auth(Roles.ADMIN)
   findAll() {
     return this.categoriesService.findAll();
   }
 
   @Get(':id')
+  @Auth(Roles.ADMIN)
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id',ParseUUIDPipe) id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoriesService.update(id, updateCategoryDto);
+  @Auth(Roles.ADMIN)
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateCategoryDto: UpdateCategoryDto, @GetUser() user: User) {
+    return this.categoriesService.update(id, updateCategoryDto, user);
   }
 
   @Delete(':id')
-  remove(@Param('id' , ParseUUIDPipe) id: string) {
+  @Auth(Roles.ADMIN)
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.remove(id);
   }
 }
