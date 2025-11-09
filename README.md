@@ -1,23 +1,23 @@
 # Shop Sale API
 
-> Proyecto v1 desarrollado con **NestJS + TypeORM + PostgreSQL** que gestiona productos, variantes, clientes y ventas, implementando relaciones complejas y transacciones seguras.
+> Proyecto v1 desarrollado con **NestJS + TypeORM + PostgreSQL** que gestiona productos, variantes, clientes y ventas, implementando relaciones complejas, transacciones seguras y como plus una IA integrada que facilita la búsqueda de datos.
 
 ---
 
 ## 🚀 Características principales
 
-✅ CRUD completo de **productos** con variantes (color, talla, stock)  
+✅ Autenticación completa con **JWT y roles**
+✅ CRUD completo de **productos** con variantes (color, talla, stock)
+✅ Uso de servicio de cloudinary integrado para el almacenamiento de imágenes
 ✅ Módulo de **ventas** con detalles e impacto automático en el inventario  
 ✅ **Transacciones** con `QueryRunner` para consistencia de datos  
 ✅ **Clientes** asociados a ventas  
 ✅ **Soft Delete** (borrado lógico)  
-✅ Listo para integrar **autenticación con JWT y roles**
 
 ---
 
 ## Características a implementar
 
-❗**Autenticación con JWT Y roles**
 ❗**Implementación de IA**
 ❗**Desliegue completo dockerizando**
 
@@ -29,8 +29,16 @@ El sistema sigue una arquitectura **modular** inspirada en el **Domain-Driven De
 
 ```bash
 src/
-|-- categories/
-|   ├── dto/
+│-- auth/
+│   ├── dto/
+│   ├── entities/
+│   ├── decorators/
+│   ├── guards/
+│   ├── interfaces/
+│   ├── strategies/
+│   └── auth.service.ts
+│-- categories/
+│   ├── dto/
 │   ├── entities/
 │   └── category.service.ts
 ├── clients/

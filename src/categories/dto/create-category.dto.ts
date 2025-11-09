@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength } from "class-validator"
+import { IsOptional, IsString, IsUUID, MinLength } from "class-validator"
 
 export class CreateCategoryDto {
 
@@ -9,4 +9,8 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @IsUUID('4', { message: 'The ID of category should be a UUID valid.' })
+  userId: string;
+
 }

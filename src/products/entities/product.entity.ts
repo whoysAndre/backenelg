@@ -27,6 +27,9 @@ export class Product {
   @Column({ name: "image_url", nullable: true, type: 'text' })
   imageUrl: string;
 
+  @Column({ name: "public_url", nullable: true, type: 'text' })
+  publicUrl: string;
+
   @Column({ name: "is_active", default: true })
   isActive: boolean
 
