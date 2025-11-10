@@ -17,7 +17,6 @@ export class Category {
   @ManyToOne(
     () => User,
     (u) => u.categories,
-    { eager: true }
   )
   user: User;
 
@@ -25,7 +24,7 @@ export class Category {
   @OneToMany(
     () => Product,
     (product) => product.category,
-    { cascade: true, eager: true }
+    { cascade: true }
   )
   products: Product[]
 }
