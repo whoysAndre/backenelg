@@ -3,12 +3,10 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorators/get-user.decorator';
 import { User } from './entities/user.entity';
-import { UserRoleGuard } from './guards/user-role.guard';
-import { Auth, RoleProtected } from './decorators';
-import { Roles } from './interfaces';
+import { Auth } from './decorators';
+
 
 
 @Controller('auth')
@@ -39,9 +37,14 @@ export class AuthController {
   @Get("check-auth-status")
   @Auth()
   checkAuthStatus(
-    @GetUser() user:User
-  ){
+    @GetUser() user: User
+  ) {
     return this.authService.checkAuthStatus(user)
+  }
+
+  @Post("/verify-token")
+  verifyToken(@Body() verifyTokenDto: { token: string }) {
+    return this.authService.verifyToken(verifyTokenDto.token);
   }
 
 }

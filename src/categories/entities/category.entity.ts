@@ -16,10 +16,7 @@ export class Category {
   @ManyToOne(
     () => User,
     (u) => u.categories,
-<<<<<<< HEAD
     //{ eager: true }
-=======
->>>>>>> 1ee251cf836a658931d8e45be23101a2ebfa5929
   )
   user: User;
 
