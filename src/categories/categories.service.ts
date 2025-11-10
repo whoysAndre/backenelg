@@ -27,11 +27,7 @@ export class CategoriesService {
   }
 
   async findAll() {
-    const categories = await this.categoryRepository.find({
-      relations: {
-        products: true
-      }
-    })
+    const categories = await this.categoryRepository.find()
     return categories;
   }
 

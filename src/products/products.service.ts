@@ -10,7 +10,6 @@ import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class ProductsService {
-
   //DI 
   constructor(
     private readonly categoryRepository: CategoriesService,
@@ -57,7 +56,8 @@ export class ProductsService {
   async findAll() {
     const products = await this.productRepository.find({
       relations: {
-        variantProduct: true
+        variantProduct: true,
+        category:true
       },
       where: {
         isActive: true

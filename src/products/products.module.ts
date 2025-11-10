@@ -6,6 +6,7 @@ import { Product } from './entities/product.entity';
 import { VariantProduct } from './entities/variants-product.entity';
 import { CategoriesModule } from 'src/categories/categories.module';
 import { FilesModule } from 'src/files/files.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 
 @Module({
@@ -14,7 +15,8 @@ import { FilesModule } from 'src/files/files.module';
   imports: [
     TypeOrmModule.forFeature([Product, VariantProduct]),
     CategoriesModule,
-    FilesModule
+    FilesModule,
+    AuthModule
   ],
   exports: [TypeOrmModule, ProductsService]
 })
