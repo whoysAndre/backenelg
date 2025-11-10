@@ -13,11 +13,10 @@ export class Category {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-
   @ManyToOne(
     () => User,
     (u) => u.categories,
-    { eager: true }
+    //{ eager: true }
   )
   user: User;
 
@@ -25,7 +24,7 @@ export class Category {
   @OneToMany(
     () => Product,
     (product) => product.category,
-    { cascade: true, eager: true }
+    { cascade: true }
   )
   products: Product[]
 }

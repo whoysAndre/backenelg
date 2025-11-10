@@ -10,7 +10,6 @@ import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class ProductsService {
-
   //DI 
   constructor(
     private readonly categoryRepository: CategoriesService,
