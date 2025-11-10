@@ -57,7 +57,8 @@ export class ProductsService {
   async findAll() {
     const products = await this.productRepository.find({
       relations: {
-        variantProduct: true
+        variantProduct: true,
+        category: true
       },
       where: {
         isActive: true
