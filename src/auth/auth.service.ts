@@ -81,6 +81,33 @@ export class AuthService {
     }
   }
 
+  async verifyToken(token: string) {
+    try {
+
+      const payload = this.jwtService.verify<JwtPayload>(token);
+
+      const user = await this.userRepository.findOne({
+        where: { email: payload.email }
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return {
+        isValid: true,
+        payload,
+        user // Devuelve el usuario completo si lo necesitas
+      };
+
+    } catch (error) {
+      return {
+        isValid: false,
+        error: error.message || 'Token inválido'
+      };
+    }
+  }
+
   //JWT
   private getJwtToken(payload: JwtPayload) {
     const token = this.jwtService.sign(payload);

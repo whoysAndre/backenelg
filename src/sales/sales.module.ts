@@ -6,6 +6,7 @@ import { Sale } from './entities/sale.entity';
 import { DetailSale } from './entities/detail-sale.entity';
 import { ClientsModule } from 'src/clients/clients.module';
 import { ProductsModule } from 'src/products/products.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [SalesController],
@@ -13,7 +14,8 @@ import { ProductsModule } from 'src/products/products.module';
   imports: [
     TypeOrmModule.forFeature([Sale, DetailSale]),
     ClientsModule,
-    ProductsModule
+    ProductsModule,
+    AuthModule
   ]
 })
 export class SalesModule { }

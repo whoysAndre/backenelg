@@ -10,7 +10,6 @@ import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class ProductsService {
-
   //DI 
   constructor(
     private readonly categoryRepository: CategoriesService,
@@ -24,9 +23,17 @@ export class ProductsService {
 
   async create(createProductDto: CreateProductDto, image?: Express.Multer.File) {
     try {
-      const { variants = [], categoryId, ...restProduct } = createProductDto;
+      const { variants = [], categoryId, sku, ...restProduct } = createProductDto;
 
-      const category = await this.categoryRepository.findOne(categoryId);
+      const skuTransform = restProduct.title.toLowerCase()
+        .replaceAll(' ', '_')
+        .replaceAll("'", "")
+      let product = await this.productRepository.findOne({
+        where: { sku: skuTransform },
+        relations: ['variantProduct', 'category'],
+      });
+
+
       let imageUrl: string | undefined;
       let publicUrl: string | undefined;
       if (image) {
@@ -35,34 +42,57 @@ export class ProductsService {
         publicUrl = uploadResult.public_id;
       }
 
-      const product = this.productRepository.create({
-        ...restProduct,
-        category,
-        imageUrl,
-        publicUrl,
-        variantProduct: variants.map((variant) => this.variantProductRepository.create({
-          sizes: variant.sizes,
-          color: variant.color,
-          stock: variant.stock
-        }))
+      if (!product) {
+
+        const category = await this.categoryRepository.findOne(categoryId);
+
+        product = this.productRepository.create({
+          ...restProduct,
+          sku,
+          category,
+          imageUrl,
+          publicUrl,
+        });
+
+        await this.productRepository.save(product);
+      }
+
+
+      if (variants && variants.length > 0) {
+        const newVariants = variants.map((variant) =>
+          this.variantProductRepository.create({
+            sizes: variant.sizes,
+            color: variant.color,
+            stock: variant.stock,
+            product,
+          }),
+        );
+
+        await this.variantProductRepository.save(newVariants);
+      }
+
+
+      return await this.productRepository.findOne({
+        where: { id: product.id },
+        relations: ['variantProduct', 'category'],
       });
-
-      return await this.productRepository.save(product);
-
     } catch (error) {
-      throw new BadRequestException(error);
+      console.error(error);
+      throw new BadRequestException(error.message || 'Error creating product');
     }
   }
+
 
   async findAll() {
     const products = await this.productRepository.find({
       relations: {
         variantProduct: true,
-        category:true
+        category: true
       },
       where: {
         isActive: true
-      }
+      },
+
     });
     return products;
   }

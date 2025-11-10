@@ -2,7 +2,7 @@ import { User } from "src/auth/entities/user.entity";
 import { Product } from "src/products/entities/product.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity("categories")
 export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -13,10 +13,10 @@ export class Category {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-
   @ManyToOne(
     () => User,
     (u) => u.categories,
+    //{ eager: true }
   )
   user: User;
 
