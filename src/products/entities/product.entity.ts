@@ -20,7 +20,11 @@ export class Product {
   sku: string;
 
   @Column('numeric', {
-    default: 0
+    default: 0,
+    transformer: {
+      to: (value: number) => value, 
+      from: (value: string | number) => Number(value), 
+    },
   })
   price: number;
 

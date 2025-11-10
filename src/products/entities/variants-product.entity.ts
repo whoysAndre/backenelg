@@ -15,7 +15,13 @@ export class VariantProduct {
   @Column({ type: 'text', nullable: true })
   color: string;
 
-  @Column({ type: "numeric", default: 0 })
+  @Column('numeric', {
+    default: 0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string | number) => Number(value),
+    },
+  })
   stock: number
 
   @CreateDateColumn({ name: 'created_at' })
