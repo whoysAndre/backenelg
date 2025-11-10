@@ -2,33 +2,40 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { Auth } from 'src/auth/decorators';
+import { Roles } from 'src/auth/interfaces';
 
 @Controller('sales')
 export class SalesController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(private readonly salesService: SalesService) { }
 
   @Post()
+  @Auth(Roles.ADMIN)
   create(@Body() createSaleDto: CreateSaleDto) {
     return this.salesService.create(createSaleDto);
   }
 
   @Get()
+  @Auth(Roles.ADMIN)
   findAll() {
     return this.salesService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id',ParseUUIDPipe) id: string) {
+  @Auth(Roles.ADMIN)
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.salesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id',ParseUUIDPipe) id: string, @Body() updateSaleDto: UpdateSaleDto) {
+  @Auth(Roles.ADMIN)
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateSaleDto: UpdateSaleDto) {
     return this.salesService.update(id, updateSaleDto);
   }
 
   @Delete(':id')
-  remove(@Param('id',ParseUUIDPipe) id: string) {
+  @Auth(Roles.ADMIN)
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.salesService.remove(id);
   }
 }
