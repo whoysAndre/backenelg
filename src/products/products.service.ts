@@ -97,8 +97,13 @@ export class ProductsService {
   }
 
   async findOne(id: string) {
-    const product = await this.productRepository.findOneBy({
-      id
+    const product = await this.productRepository.findOne({
+      where: {
+        id
+      },
+      relations: {
+        category: true
+      }
     });
     if (!product) throw new NotFoundException(`Product whit id: ${id} not found`);
     return product;
@@ -199,7 +204,6 @@ export class ProductsService {
         message: 'Product and variants updated successfully',
         product: savedProduct
       };
-
 
     } catch (error) {
       await queryRunner.rollbackTransaction();

@@ -64,6 +64,9 @@ export class AuthService {
     return { token: this.getJwtToken({ email: user.email }), ...user };
   }
 
+  //Logout
+  
+
   update(id: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} auth`;
   }
