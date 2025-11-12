@@ -25,60 +25,85 @@ export class SalesService {
 
 
   async create(createSaleDto: CreateSaleDto) {
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      const { clientId, details, status } = createSaleDto;
 
-      const { clientId, details, total, status } = createSaleDto;
-
-      //1° Get client
+      // 1️⃣ Obtener cliente
       const client = await this.clientService.findOne(clientId);
 
-      //2° Create Sale
+      // 2️⃣ Calcular subtotales y total general
+      let total = 0;
+      const detailEntities: DetailSale[] = [];
+
+      for (const d of details) {
+        const variant = await this.variantRepository.findOne({
+          where: { id: d.variantProductId },
+        });
+
+        if (!variant)
+          throw new BadRequestException(`Variant with id ${d.variantProductId} not found`);
+
+        // Calcula subtotal automáticamente
+        const subtotal = d.quantity * d.unitPrice;
+        total += subtotal;
+
+        // Crea entidad de detalle
+        const detail = this.detailSaleRepository.create({
+          quantity: d.quantity,
+          unitPrice: d.unitPrice,
+          subtotal,
+          variantProduct: variant,
+        });
+
+        detailEntities.push(detail);
+
+        // Actualizar stock del producto
+        if (variant.stock < d.quantity) {
+          throw new BadRequestException(`Not enough stock for variant ${variant.id}`);
+        }
+        variant.stock -= d.quantity;
+        await queryRunner.manager.save(variant);
+      }
+
+      // 3️⃣ Crear la venta
       const sale = this.saleRepository.create({
         client,
         total,
-        status
+        status,
+        details: detailEntities, // relación
       });
 
       await queryRunner.manager.save(sale);
 
-
-      //3° Create Detail Sale
-      for (const d of details) {
-        const variant = await this.variantRepository.findOne({
-          where: {
-            id: d.variantProductId
-          }
-        });
-        if (!variant) throw new BadRequestException(`Variant with id ${d.variantProductId} not found`);
-
-        const detail = this.detailSaleRepository.create({
-          sale,
-          variantProduct: variant,
-          quantity: d.quantity,
-          unitPrice: d.unitPrice,
-          subtotal: d.subtotal
-        });
-
+      // 4️⃣ Guardar detalles (con la relación a la venta ya creada)
+      for (const detail of detailEntities) {
+        detail.sale = sale;
         await queryRunner.manager.save(detail);
-        variant.stock -= d.quantity;
-        await queryRunner.manager.save(variant);
-
       }
+
       await queryRunner.commitTransaction();
-      return { message: 'Sale created successfully', sale };
+
+      return {
+        message: 'Sale created successfully',
+        sale: {
+          id: sale.id,
+          total: sale.total,
+          client: sale.client,
+          details: detailEntities,
+        },
+      };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(error.message);
     } finally {
       await queryRunner.release();
     }
-
   }
+
 
   async findAll() {
     return this.saleRepository.find({
@@ -108,40 +133,71 @@ export class SalesService {
     try {
       const sale = await this.saleRepository.findOne({
         where: { id },
-        relations: ['details'],
+        relations: ['details', 'details.variantProduct'],
       });
+
       if (!sale) throw new NotFoundException(`Sale not found`);
-      const { total, status, details } = updateSaleDto;
 
-      // Update basic fields
-      sale.total = total ?? sale.total;
-      sale.status = status ?? sale.status;
+      const { status, details = [] } = updateSaleDto;
 
-      if (details) {
-        await queryRunner.manager.delete(DetailSale, { sale: { id } });
 
-        for (const d of details) {
-          const variant = await this.variantRepository.findOne({
-            where: { id: d.variantProductId },
-          });
-          if (!variant)
-            throw new BadRequestException(
-              `Variant with id ${d.variantProductId} not found`,
-            );
-
-          const detail = this.detailSaleRepository.create({
-            sale,
-            variantProduct: variant,
-            quantity: d.quantity,
-            unitPrice: d.unitPrice,
-            subtotal: d.subtotal,
-          });
-
-          await queryRunner.manager.save(detail);
+      for (const oldDetail of sale.details) {
+        const variant = await this.variantRepository.findOne({
+          where: { id: oldDetail.variantProduct.id },
+        });
+        if (variant) {
+          variant.stock += oldDetail.quantity;
+          await queryRunner.manager.save(variant);
         }
       }
 
+
+      await queryRunner.manager.delete(DetailSale, { sale: { id } });
+
+      let total = 0;
+      const newDetails: DetailSale[] = [];
+
+      for (const d of details) {
+        const variant = await this.variantRepository.findOne({
+          where: { id: d.variantProductId },
+        });
+
+        if (!variant)
+          throw new BadRequestException(`Variant with id ${d.variantProductId} not found`);
+
+        if (variant.stock < d.quantity)
+          throw new BadRequestException(`Not enough stock for variant ${variant.id}`);
+
+        const subtotal = d.quantity * d.unitPrice;
+        total += subtotal;
+
+        const detail = this.detailSaleRepository.create({
+          sale,
+          variantProduct: variant,
+          quantity: d.quantity,
+          unitPrice: d.unitPrice,
+          subtotal,
+        });
+
+        newDetails.push(detail);
+
+
+        variant.stock -= d.quantity;
+        await queryRunner.manager.save(variant);
+      }
+
+
+      sale.status = status ?? sale.status;
+      sale.total = total;
+      sale.details = newDetails;
+
       await queryRunner.manager.save(sale);
+
+
+      for (const detail of newDetails) {
+        await queryRunner.manager.save(detail);
+      }
+
       await queryRunner.commitTransaction();
 
       return { message: 'Sale updated successfully', sale };
@@ -153,6 +209,7 @@ export class SalesService {
       await queryRunner.release();
     }
   }
+
 
   async remove(id: string) {
 

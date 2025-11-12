@@ -19,7 +19,6 @@ export class Sale {
   })
   status: StatusSale;
 
-
   @Column({ name: 'sale_date', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   saleDate: Date;
 

@@ -82,7 +82,6 @@ export class ProductsService {
     }
   }
 
-
   async findAll() {
     const products = await this.productRepository.find({
       relations: {

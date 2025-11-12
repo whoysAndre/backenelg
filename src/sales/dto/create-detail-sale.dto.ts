@@ -18,11 +18,6 @@ export class CreateDetailSaleDto {
   @IsNotEmpty()
   unitPrice: number;
 
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  subtotal: number;
-
   @IsUUID()
   @IsOptional()
   saleId?: string;

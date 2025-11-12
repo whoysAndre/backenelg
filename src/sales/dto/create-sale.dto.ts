@@ -5,11 +5,6 @@ import { CreateDetailSaleDto } from './create-detail-sale.dto';
 
 export class CreateSaleDto {
   
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  total: number;
-
   @IsEnum(StatusSale)
   @IsOptional()
   status?: StatusSale;
