@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { ProductsService } from 'src/products/products.service';
 
-
 @Injectable()
 export class DashboardService {
 
   constructor(
     private readonly productService: ProductsService
-  ) { }
+  ){}
 
   async getInventoryStats() {
 
     const products = await this.productService.findAll();
-
     const totalProducts = products.length;
-
+    
     const totalStock = products.reduce((acc, product) => {
       const stockForProducts = product.variantProduct.reduce((acc2, variant) => acc2 + variant.stock, 0);
       return acc + stockForProducts;
@@ -56,7 +54,8 @@ export class DashboardService {
       return stock < 5;
     });
 
-    //Graficts -> Alex Acedo
+    //Grafics -> Alex Acedo
+    
     
     return {
       totalStock,
