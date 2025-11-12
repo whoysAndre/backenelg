@@ -19,11 +19,15 @@ export class DashboardService {
       return acc + stockForProducts;
     }, 0);
 
+    const valueInventary = products.reduce((acc,product)=> {
+      const stockForProducts = product.variantProduct.reduce((acc2, variant) => acc2 + variant.stock, 0);
+      return acc + (product.price * stockForProducts);
+    },0);
+
     return {
-      totalStock
+      totalStock,
+      valueInventary
     };
   }
-
-
 
 }
