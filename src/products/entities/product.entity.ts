@@ -39,7 +39,10 @@ export class Product {
 
   @ManyToOne(
     () => Category,
-    (category) => category.products
+    (category) => category.products,
+    {
+      eager: true
+    }
   )
   category: Category
 
