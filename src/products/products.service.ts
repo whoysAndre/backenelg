@@ -97,120 +97,117 @@ export class ProductsService {
   }
 
   async findOne(id: string) {
-    const product = await this.productRepository.findOne({
-      where: {
-        id
-      },
-      relations: {
-        category: true
-      }
+    const product = await this.productRepository.findOneBy({
+      id
     });
     if (!product) throw new NotFoundException(`Product whit id: ${id} not found`);
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto, image?: Express.Multer.File) {
+  async update(id: string, updateProductDto: UpdateProductDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-
-    const productRepo = queryRunner.manager.getRepository(Product);
-    const variantRepo = queryRunner.manager.getRepository(VariantProduct);
-
     try {
-      const { variants = [], categoryId, ...toUpdate } = updateProductDto;
 
-      const product = await productRepo.findOne({
-        where: { id },
-        relations: ['variantProduct', 'category'],
+      const { variants = [], categoryId, ...toUpdate } = updateProductDto;
+      const product = await this.productRepository.findOne({
+        where: {
+          id
+        },
+        relations: ["variantProduct"]
       });
 
       if (!product) throw new NotFoundException('Product not found');
-
-      if (image) {
-        const uploadResult = await this.fileService.updateImage(product.publicUrl, image);
-        product.imageUrl = uploadResult.url;
-        product.publicUrl = uploadResult.public_id;
-      }
 
       let category = product.category;
       if (categoryId) {
         category = await this.categoryRepository.findOne(categoryId);
       }
 
-      const updatedProductData: Partial<Product> = {
+      const updatedProduct = await this.productRepository.preload({
         id,
         ...toUpdate,
-        imageUrl: product.imageUrl,
-        publicUrl: product.publicUrl,
-        category,
-      };
+        category
+      });
 
-      const updatedProduct = await productRepo.preload(updatedProductData as any);
       if (!updatedProduct) throw new NotFoundException('Product not found during preload');
 
+
+      //Variants
       const updatedVariants: VariantProduct[] = [];
-
-      const existingVariants = product.variantProduct ?? [];
-      const existingById = new Map(existingVariants.map(v => [String(v.id), v]));
-
-      const incomingVariantIds = variants
-        .map(v => v.id)
-        .filter(idv => idv !== undefined && idv !== null)
-        .map(idv => String(idv));
-
       for (const variant of variants) {
         if (variant.id) {
-          const existing = existingById.get(String(variant.id));
-          if (!existing) {
+          const existingVariant = await this.variantProductRepository.findOneBy({
+            id: variant.id
+          })
+
+          if (!existingVariant) {
             throw new NotFoundException(`Variant with ID ${variant.id} not found`);
           }
 
-          const updatedVariant = await variantRepo.preload({
+          const updatedVariant = await this.variantProductRepository.preload({
             id: variant.id,
-            ...variant,
-          } as any);
+            ...variant
+          });
 
-          if (!updatedVariant) throw new NotFoundException('Variant preload failed');
-          await variantRepo.save(updatedVariant);
+          if (!updatedVariant) throw new NotFoundException('Product not found during preload');
+
+          await this.variantProductRepository.save(updatedVariant)
           updatedVariants.push(updatedVariant);
+
         } else {
 
-          const newVariant = variantRepo.create({
+          //Create new Variant
+          const newVariant = this.variantProductRepository.create({
             sizes: variant.sizes,
             color: variant.color,
             stock: variant.stock,
-            product: updatedProduct,
+            product: updatedProduct
           });
-          const saved = await variantRepo.save(newVariant);
-          updatedVariants.push(saved);
+          const savedProduct = await this.variantProductRepository.save(newVariant);
+          updatedVariants.push(savedProduct);
+
         }
       }
 
-      const variantsToDelete = existingVariants.filter(ev => !incomingVariantIds.includes(String(ev.id)));
+      const existingVariants = await this.variantProductRepository.find({
+        where: {
+          product: { id }
+        }
+      })
+
+      const incomingVariantIds = variants
+        .map(v => v.id)
+        .filter(id => id !== undefined && id !== null);
+
+      const variantsToDelete = existingVariants.filter(
+        existingVariant => !incomingVariantIds.includes(existingVariant.id)
+      );
+
       if (variantsToDelete.length > 0) {
-        await variantRepo.remove(variantsToDelete);
+        await this.variantProductRepository.remove(variantsToDelete);
       }
 
       updatedProduct.variantProduct = updatedVariants;
 
-      await productRepo.save(updatedProduct);
-
+      const savedProduct = await this.productRepository.save(updatedProduct);
       await queryRunner.commitTransaction();
 
       return {
         message: 'Product and variants updated successfully',
-        status: true
+        product: savedProduct
       };
+
+
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new BadRequestException(error.message || 'Error updating product');
+      throw new BadRequestException(error.message);
     } finally {
       await queryRunner.release();
     }
   }
-
 
   async remove(id: string) {
 
