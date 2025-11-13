@@ -15,7 +15,7 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('image', {
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter(req, file, callback) {
-      if (!file.mimetype.match(/^image\/(jpeg|png|jpg|webp)$/)) {
+      if (!file.mimetype.match(/^image\/(jpeg|png|jpg|webp|avif)$/)) {
         return callback(new BadRequestException('Only image files are allowed!'), false);
       }
       callback(null, true);
@@ -52,9 +52,9 @@ export class ProductsController {
       callback(null, true);
     },
   }))
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto,@UploadedFile() image: Express.Multer.File) {
     console.log(updateProductDto);
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(id, updateProductDto,image);
   }
 
   @Delete(':id')
