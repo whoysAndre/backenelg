@@ -27,7 +27,7 @@ export class FilesService {
     const result = await this.cloudinaryService.uploadFile(newFile);
     return {
       message: 'Image updated successfully',
-      secure_url: result.secure_url,
+      url: result.secure_url,
       public_id: result.public_id,
     };
   }

@@ -22,8 +22,8 @@ export class Product {
   @Column('numeric', {
     default: 0,
     transformer: {
-      to: (value: number) => value, 
-      from: (value: string | number) => Number(value), 
+      to: (value: number) => value,
+      from: (value: string | number) => Number(value),
     },
   })
   price: number;
@@ -68,10 +68,10 @@ export class Product {
 
   @BeforeUpdate()
   checkSlugUpdate() {
-    this.sku = this.sku
+    this.sku = this.title
       .toLowerCase()
       .replaceAll(' ', '_')
-      .replaceAll("'", "")
+      .replaceAll("'", "");
   }
 
 }
