@@ -51,7 +51,7 @@ export class AuthController {
   //:=> LOGOUT
   @Post("/logout")
   @Auth()
-  logout(@Body() body: { token: string }) {
+  logout(@Body() body: { token: string }){
     return this.authService.logout(body.token)
   }
 
