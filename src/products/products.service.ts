@@ -110,6 +110,7 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
+    
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -125,7 +126,7 @@ export class ProductsService {
       });
 
       if (!product) throw new NotFoundException('Product not found');
-
+      console.log(product);
       let category = product.category;
       if (categoryId) {
         category = await this.categoryRepository.findOne(categoryId);
