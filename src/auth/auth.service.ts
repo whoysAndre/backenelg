@@ -24,6 +24,7 @@ export class AuthService {
 
   ) { }
 
+  
   async register(createUserDto: CreateUserDto) {
     try {
       const { password, ...rest } = createUserDto;
