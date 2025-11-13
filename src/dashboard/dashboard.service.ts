@@ -54,7 +54,7 @@ export class DashboardService {
       return stock < 5;
     });
 
-    //Grafics -> Alex Acedo
+    //Grafics -> Alex Acedo Adriancen
     
     
     return {
