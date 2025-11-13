@@ -11,7 +11,7 @@ export class CreateVariantProductDto {
   
   @IsOptional()
   @IsString()
-  id?: string;  // ← ID opcional para actualizaciones
+  id?: string; 
 
   @IsString()
   @IsNotEmpty({ message: 'Size is required.' })
