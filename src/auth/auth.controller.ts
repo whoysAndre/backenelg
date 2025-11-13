@@ -47,4 +47,13 @@ export class AuthController {
     return this.authService.verifyToken(verifyTokenDto.token);
   }
 
+
+  //:=> LOGOUT
+  @Post("/logout")
+  @Auth()
+  logout(@Body() body: { token: string }) {
+    return this.authService.logout(body.token)
+  }
+
+
 }
