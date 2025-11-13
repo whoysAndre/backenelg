@@ -112,6 +112,19 @@ export class AuthService {
     }
   }
 
+
+  //:=> LOGOUT
+  async logout(token:string){
+    return{
+      message:'Sesion cerrada exitosamente',
+      success:true
+      
+    }
+  }
+
+
+
+
   //JWT
   private getJwtToken(payload: JwtPayload) {
     const token = this.jwtService.sign(payload);
