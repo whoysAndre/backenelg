@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
@@ -38,4 +38,18 @@ export class SalesController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.salesService.remove(id);
   }
+
+
+
+
+
+  //13/10/2025
+
+  @Get('statistics/mes')
+  @Auth(Roles.ADMIN)
+  getSalesByMonth(@Query('year') year?: string) {
+    const yearNumber = year ? parseInt(year) : undefined;
+    return this.salesService.getSalesByMonth(yearNumber);
+  }
+
 }

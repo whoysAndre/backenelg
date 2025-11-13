@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { ClientsService } from 'src/clients/clients.service';
-import { DataSource, Repository } from 'typeorm';
+import { Between, DataSource, Repository } from 'typeorm';
 import { Sale } from './entities/sale.entity';
 import { DetailSale } from './entities/detail-sale.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -221,4 +221,76 @@ export class SalesService {
     await this.saleRepository.save(sale);
 
   }
+
+
+
+
+
+  //13/10/2025
+
+async getSalesByMonth(year?: number) {
+  const targetYear = year || new Date().getFullYear();
+
+  //  Obtener todas las ventas del año usando 
+  const sales = await this.saleRepository.find({
+    where: {
+      isActive: true,
+      createdAt: Between(
+        new Date(`${targetYear}-01-01`),
+        new Date(`${targetYear}-12-31 23:59:59`)
+      ),
+    },
+    select: ['id', 'total', 'createdAt'],
+  });
+
+  //  Procesar ventas y agrupar por mes
+  const salesByMonth = new Map<number, { totalSales: number; salesCount: number }>();
+  let totalAnnualSales = 0;
+  let totalSalesCount = 0;
+
+  sales.forEach(sale => {
+    const month = sale.createdAt.getMonth() + 1; 
+    const total = Number(sale.total);
+
+    const current = salesByMonth.get(month) || { totalSales: 0, salesCount: 0 };
+    
+    salesByMonth.set(month, {
+      totalSales: current.totalSales + total,
+      salesCount: current.salesCount + 1,
+    });
+
+    totalAnnualSales += total;
+    totalSalesCount += 1;
+  });
+
+  //  Nombres de meses
+  const MONTH_NAMES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  // Generar array completo de 12 meses
+  const monthlyData = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const data = salesByMonth.get(month);
+
+    return {
+      month,
+      monthName: MONTH_NAMES[i],
+      totalSales: data?.totalSales ?? 0,
+      salesCount: data?.salesCount ?? 0,
+    };
+  });
+
+  return {
+    year: targetYear,
+    totalAnnualSales,
+    totalSalesCount,
+    monthlyData,
+  };
+}
+
+
+
+
 }
