@@ -27,21 +27,12 @@ export class SalesController {
     return this.salesService.findOne(id);
   }
 
-  @Patch(':id')
-  @Auth(Roles.ADMIN)
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateSaleDto: UpdateSaleDto) {
-    return this.salesService.update(id, updateSaleDto);
-  }
 
   @Delete(':id')
   @Auth(Roles.ADMIN)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.salesService.remove(id);
   }
-
-
-
-
 
   //13/10/2025
 
