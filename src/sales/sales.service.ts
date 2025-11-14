@@ -16,8 +16,6 @@ export class SalesService {
     private readonly clientService: ClientsService,
     @InjectRepository(Sale)
     private readonly saleRepository: Repository<Sale>,
-    @InjectRepository(DetailSale)
-    private readonly detailSaleRepository: Repository<DetailSale>,
   ) { }
 
   async create(createSaleDto: CreateSaleDto) {
@@ -33,7 +31,6 @@ export class SalesService {
       const detailEntities: DetailSale[] = [];
       const productsToCheck = new Set<string>();
 
-      // Validar y preparar datos
       for (const d of details) {
         const variant = await queryRunner.manager.findOne(VariantProduct, {
           where: { id: d.variantProductId },
@@ -55,28 +52,36 @@ export class SalesService {
         const subtotal = d.quantity * d.unitPrice;
         total += subtotal;
 
-        const detail = this.detailSaleRepository.create({
+        const detail = queryRunner.manager.create(DetailSale, {
           quantity: d.quantity,
           unitPrice: d.unitPrice,
           subtotal,
+          variantProductId: variant.id,
+          productTitle: variant.product.title,
+          variantSizes: variant.sizes,
+          variantColor: variant.color,
+          productSku: variant.product.sku,
           variantProduct: variant,
         });
 
         detailEntities.push(detail);
+
         variant.stock -= d.quantity;
         await queryRunner.manager.save(variant);
-
 
         productsToCheck.add(variant.product.id);
       }
 
-      const sale = this.saleRepository.create({
+      const sale = queryRunner.manager.create(Sale, {
         client,
         total,
         status,
         details: detailEntities,
       });
+
       await queryRunner.manager.save(sale);
+
+      // Verificar y actualizar estado de productos
       for (const productId of productsToCheck) {
         const variants = await queryRunner.manager.find(VariantProduct, {
           where: { product: { id: productId } },
@@ -128,12 +133,15 @@ export class SalesService {
   }
 
   async findOne(id: string) {
+
     const sale = await this.saleRepository.findOne({
       where: { id, isActive: true },
-      relations: ['client', 'details', 'details.variantProduct'],
+      relations: ['client', 'details'],
     });
 
     if (!sale) throw new NotFoundException(`Sale with id ${id} not found`);
+
+
     return sale;
   }
 
