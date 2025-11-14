@@ -1,7 +1,6 @@
 
 
 export enum StatusSale{
-  PENDING= "pendiente",
   COMPLETED="completado",
   CANCEL="cancelado"
 }

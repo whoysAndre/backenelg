@@ -34,6 +34,7 @@ export class SalesController {
     return this.salesService.remove(id);
   }
 
+
   //13/10/2025
 
   @Get('statistics/mes')

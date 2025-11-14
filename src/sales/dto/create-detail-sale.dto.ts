@@ -6,7 +6,7 @@ export class CreateDetailSaleDto {
 
   @IsOptional()
   @IsString()
-  id?: string;  // ← ID opcional para actualizaciones
+  id?: string; 
 
   @IsNumber()
   @Type(() => Number)

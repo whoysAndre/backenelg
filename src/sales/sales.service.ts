@@ -145,7 +145,7 @@ export class SalesService {
     await this.saleRepository.save(sale);
   }
 
-  //13/10/2025
+
   async getSalesByMonth(year?: number) {
     const targetYear = year || new Date().getFullYear();
     //  Obtener todas las ventas del año usando 
@@ -206,4 +206,6 @@ export class SalesService {
       monthlyData,
     };
   }
+
+
 }

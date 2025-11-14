@@ -15,14 +15,14 @@ export class Sale {
   @Column({
     type: "enum",
     enum: StatusSale,
-    default: StatusSale.PENDING
+    default: StatusSale.COMPLETED
   })
   status: StatusSale;
 
   @Column({ name: 'sale_date', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   saleDate: Date;
 
-  @Column({ name: "is_active",default: true })
+  @Column({ name: "is_active", default: true })
   isActive: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
