@@ -38,7 +38,7 @@ export class VariantProduct {
 
   @OneToMany(
     () => DetailSale,
-    (ds) => ds.variantProduct
+    (ds) => ds.variantProductId
   )
   details: DetailSale[]
 
