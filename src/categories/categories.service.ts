@@ -66,4 +66,54 @@ export class CategoriesService {
       message: "Category deleted"
     }
   }
+
+  //15/11/2025
+async getCategoriesWithPercentages() {
+  try {
+    // Obtener todas las categorías con sus productos activos
+    const categories = await this.categoryRepository.find({
+      relations: ['products'],
+    });
+
+    // Contar solo productos activos por categoría
+    const categoriesData = categories.map(category => ({
+      id: category.id,
+      name: category.name,
+      productCount: category.products?.filter(product => product.isActive).length || 0
+    }));
+
+    // Calcular el total de productos activos
+    const totalProducts = categoriesData.reduce((sum, category) => sum + category.productCount, 0);
+
+    // Si no hay productos, retornar vacío
+    if (totalProducts === 0) {
+      return {
+        message: 'No hay productos activos',
+        data: [],
+        total: 0
+      };
+    }
+
+    // Calcular porcentajes
+    const data = categoriesData
+      .map(category => ({
+        id: category.id,
+        name: category.name,
+        productCount: category.productCount,
+        porcentage: parseFloat(((category.productCount / totalProducts) * 100).toFixed(2))
+      }))
+      .filter(category => category.productCount > 0) // Solo categorías con productos
+      .sort((a, b) => b.porcentage - a.porcentage); // Ordenar de mayor a menor
+
+    return {
+      data,
+      total: totalProducts
+    };
+
+  } catch (error) {
+    throw new InternalServerErrorException('Error al obtener estadísticas de categorías');
+  }
+}
+
+
 }

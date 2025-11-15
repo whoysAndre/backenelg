@@ -40,4 +40,17 @@ export class CategoriesController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.remove(id);
   }
+
+
+//15/11/2025
+
+@Get('statistics/percentages')
+// @Auth(Roles.ADMIN)
+getCategoriesPercentages() {
+  return this.categoriesService.getCategoriesWithPercentages();
+}
+
+
+
+
 }
