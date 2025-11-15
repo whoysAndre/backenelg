@@ -124,7 +124,7 @@ export class SalesService {
 
   async findAll() {
     return this.saleRepository.find({
-      relations: ['client', 'details', 'details.variantProduct'],
+      relations: ['client', 'details'],
       where: {
         isActive: true
       },

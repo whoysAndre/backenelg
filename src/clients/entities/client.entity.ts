@@ -37,7 +37,6 @@ export class Client {
     (s) => s.client,
     {
       cascade: true,
-      eager: true
     }
   )
   sales: Sale[]
