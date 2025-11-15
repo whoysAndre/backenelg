@@ -153,6 +153,15 @@ export class SalesService {
     await this.saleRepository.save(sale);
   }
 
+  async findByDateRange(start: Date, end: Date) {
+    return await this.saleRepository.find({
+      where: {
+        saleDate: Between(start, end)
+      },
+      relations: ['client', 'details']
+    });
+  }
+
 
   async getSalesByMonth(year?: number) {
     const targetYear = year || new Date().getFullYear();
