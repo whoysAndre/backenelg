@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
-import { UpdateSaleDto } from './dto/update-sale.dto';
 import { Auth } from 'src/auth/decorators';
 import { Roles } from 'src/auth/interfaces';
 
@@ -36,7 +35,6 @@ export class SalesController {
 
 
   //13/10/2025
-
   @Get('statistics/mes')
   @Auth(Roles.ADMIN)
   getSalesByMonth(@Query('year') year?: string) {
