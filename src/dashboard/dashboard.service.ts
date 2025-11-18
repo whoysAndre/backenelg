@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ClientsService } from 'src/clients/clients.service';
 import { ProductsService } from 'src/products/products.service';
 import { SalesService } from 'src/sales/sales.service';
 
