@@ -57,8 +57,6 @@
 
 🔜 **IA integrada** para búsqueda inteligente  
 🔜 **Dockerización completa del proyecto**  
-🔜 Estadísticas avanzadas del dashboard  
-🔜 Logging profesional con Winston  
 
 ---
 
