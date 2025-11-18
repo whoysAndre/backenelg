@@ -22,11 +22,21 @@ export class ReportsController {
   @Post("sales")
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'attachment; filename="sales_reporte.pdf"')
-  async getReportWhitParamas(@Body() body: { start: string, end: string }, @Res() res: Response) {
-    const pdfDoc = await this.reportService.getReportsWithParams(new Date(body.start), new Date(body.end));
+  async getReportWhitParamas(
+    @Body() body: { start: string, end: string },
+    @Res() res: Response
+  ) {
+    const parseDate = (str: string): Date => {
+      const [y, m, d] = str.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    };
+    const start = parseDate(body.start);
+    const end = parseDate(body.end);
+
+    const pdfDoc = await this.reportService.getReportsWithParams(start, end);
+
     pdfDoc.info.Title = 'Factura';
     pdfDoc.pipe(res);
     pdfDoc.end();
   }
-
 }

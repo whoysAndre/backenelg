@@ -162,19 +162,17 @@ export class SalesService {
     });
   }
 
-
   async getSalesByMonth(year?: number) {
     const targetYear = year || new Date().getFullYear();
-    //  Obtener todas las ventas del año usando 
     const sales = await this.saleRepository.find({
       where: {
         isActive: true,
-        createdAt: Between(
+        saleDate: Between(
           new Date(`${targetYear}-01-01`),
           new Date(`${targetYear}-12-31 23:59:59`)
         ),
       },
-      select: ['id', 'total', 'createdAt'],
+      select: ['id', 'total', 'saleDate'],
     });
 
     //  Procesar ventas y agrupar por mes
@@ -183,7 +181,7 @@ export class SalesService {
     let totalSalesCount = 0;
 
     sales.forEach(sale => {
-      const month = sale.createdAt.getMonth() + 1;
+      const month = sale.saleDate.getMonth() + 1;
       const total = Number(sale.total);
 
       const current = salesByMonth.get(month) || { totalSales: 0, salesCount: 0 };
@@ -223,6 +221,5 @@ export class SalesService {
       monthlyData,
     };
   }
-
 
 }
