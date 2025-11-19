@@ -47,7 +47,6 @@ export class AuthController {
     return this.authService.verifyToken(verifyTokenDto.token);
   }
 
-
   //:=> LOGOUT
   @Post("/logout")
   @Auth()
