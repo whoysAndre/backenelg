@@ -8,10 +8,22 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
 
   app.enableCors({
-    origin: 'https://frontend-shop-lovat.vercel.app',
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'https://frontend-shop-lovat.vercel.app',
+        undefined,
+        null
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'), false);
+      }
+    },
     credentials: true,
     methods: 'GET,POST,PUT,DELETE',
   });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
