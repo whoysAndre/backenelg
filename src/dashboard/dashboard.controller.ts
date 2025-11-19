@@ -7,12 +7,10 @@ import { Roles } from 'src/auth/interfaces';
 @Controller('dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) { }
-
   @Get("/get-inventary-stats")
   @Auth(Roles.ADMIN)
   getInventoryStats() {
     return this.dashboardService.getInventoryStats();
   }
-
 
 }

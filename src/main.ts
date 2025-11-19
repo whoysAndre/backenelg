@@ -8,7 +8,7 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'https://frontend-shop-lovat.vercel.app',
     credentials: true,
     methods: 'GET,POST,PUT,DELETE',
   });

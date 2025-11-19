@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Header, Post, Res } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import type { Response } from 'express';
+import { Auth } from 'src/auth/decorators';
+import { Roles } from 'src/auth/interfaces';
 
 @Controller('reports')
 export class ReportsController {
@@ -9,6 +11,7 @@ export class ReportsController {
   ) { }
 
   @Get("sales")
+  @Auth(Roles.ADMIN)
   async getReport(@Res() res: Response) {
 
     const pdfDoc = this.reportService.getReportsWhitoutParams();
@@ -20,6 +23,7 @@ export class ReportsController {
   }
 
   @Post("sales")
+  @Auth(Roles.ADMIN)
   @Header('Content-Type', 'application/pdf')
   @Header('Content-Disposition', 'attachment; filename="sales_reporte.pdf"')
   async getReportWhitParamas(
